@@ -27,8 +27,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "math.h"
-#include "motor.h"
+#include "knob.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -59,9 +58,9 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-float Cos[360];
-float Sin[360];
-__IO uint16_t vol[10];
+
+uint32_t lastTime, deltaTime;
+
 /* USER CODE END 0 */
 
 /**
@@ -101,24 +100,9 @@ int main(void)
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
 
-  // OLED_Init();
-  // OLED_Clear();
-  // OLED_Draw_Line(10, 10, 227, 227, 10, WHITE);
-  // OLED_Draw_Line(10, 227, 227, 10, 10, WHITE);
-  // OLED_Clear();
-  // for (uint16_t i = 0; i < 360; i++)
-  // {
-  //   Cos[i] = cos(i / 180.0 * 3.14159);
-  //   Sin[i] = sin(i / 180.0 * 3.14159);
-  // }
-  // uint16_t count = 0;
+  Knob_Init();
+  Knob_Multi_Switch_Init(180);
 
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
-  HAL_ADC_Start_DMA(&hadc1, (uint32_t *)vol, 10);
-	HAL_TIM_Base_Start_IT(&htim2);
-  // Motor_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -129,25 +113,12 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     
-    Motor_TransmitReceive();
+    Knob_Run();
 
-    // uint32_t tmp = 0;
-    // float sum = 0.0f;
-    // for (uint16_t i = 0; i < 10; ++i)
-    // sum += vol[i];
-
-    // sum /= 10;
-    // sum = sum / 4096.0f * 360;
-    // sum = 0.1f * sum + 0.9f * count;
-
-    // tmp = sum;
-
-    // count = count > 358 ? 0 : count + 1;
-    // OLED_Draw_Line(120, 120, 120 + 80 * Cos[count], 120 + 80 * Sin[count], 10, BLACK);
-		// OLED_Draw_Line(120, 120, 120 + 80 * Cos[count], 120 + 80 * Sin[count], 5, WHITE);
-		// HAL_Delay(50);
-		
-    // count = tmp;
+		// uint32_t z = HAL_GetTick();
+		// deltaTime = z - lastTime;
+		// lastTime = z;
+		// u1_printf("%d\n", deltaTime);
   }
   /* USER CODE END 3 */
 }
@@ -203,7 +174,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim->Instance == TIM2)
   {
-    // Motor_TIM();
+			uint16_t angle = (uint16_t)Motor_Current_Angle;
+      Motor_Set_Angle_Goal_Deg(closest_angle[angle]);
+			Motor_TIM();
   }
 }
 /* USER CODE END 4 */

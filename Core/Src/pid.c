@@ -1,4 +1,3 @@
-#include "..\Inc\pid.h"
 #include "pid.h"
 
 float Restrict(float value, float min, float max)
@@ -8,8 +7,12 @@ float Restrict(float value, float min, float max)
 
 float Normalize(float value, float min, float max)
 {
-    float mod = fmod(value, max - min);
-    return (mod >= 0) ? (mod + min) : (mod + max);
+    float T = max - min;
+    while (value >= max)
+        value -= T;
+    while (value < min)
+        value += T;
+    return value;
 }
 
 void PID_Init(PID *pid, float Kp, float Ki, float Kd)
@@ -20,6 +23,7 @@ void PID_Init(PID *pid, float Kp, float Ki, float Kd)
     pid->error = 0;
     pid->error_last = 0;
     pid->error_sum = 0;
+    pid->flag_angle = 0;
 }
 
 void PID_Clear(PID *pid)
@@ -29,13 +33,18 @@ void PID_Clear(PID *pid)
 
 void PID_Set_Goal(PID *pid, float goal)
 {
-    pid->error_sum = 0;
-    pid->goal = goal;
+		if(pid->goal != goal)
+		{
+				pid->error_sum = 0;
+				pid->goal = goal;
+		}
 }
 
 float PID_Calculate(PID *pid, float data)
 {
     pid->error = pid->goal - data;
+    if (pid->flag_angle)
+        pid->error = Normalize(pid->error, -180.0f, 180.0f);
     pid->error_sum += pid->error;
     float output = pid->Kp * pid->error + pid->Ki * pid->error_sum + pid->Kd * (pid->error - pid->error_last);
     pid->error_last = pid->error;

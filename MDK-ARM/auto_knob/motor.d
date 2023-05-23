@@ -32,5 +32,4 @@ auto_knob/motor.o: ..\Core\Src\motor.c ..\Core\Inc\motor.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_tim_ex.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_uart.h \
   C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\math.h ..\Core\Inc\spi.h \
-  ..\Core\Inc\main.h ..\Core\Inc\pid.h ..\Core\Inc\tim.h \
-  ..\Core\Inc\usart.h
+  ..\Core\Inc\main.h ..\Core\Inc\pid.h ..\Core\Inc\tim.h

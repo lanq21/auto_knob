@@ -1,4 +1,5 @@
-auto_knob/oled.o: ..\Core\Src\oled.c ..\Core\Inc\oled.h \
+auto_knob/knob.o: ..\Core\Src\knob.c ..\Core\Inc\knob.h \
+  ..\Core\Inc\motor.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal.h \
   ..\Core\Inc\stm32f1xx_hal_conf.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_rcc.h \
@@ -31,5 +32,6 @@ auto_knob/oled.o: ..\Core\Src\oled.c ..\Core\Inc\oled.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_tim.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_tim_ex.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_uart.h \
-  ..\Core\Inc\spi.h ..\Core\Inc\main.h \
-  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\math.h
+  C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\math.h ..\Core\Inc\spi.h \
+  ..\Core\Inc\main.h ..\Core\Inc\pid.h ..\Core\Inc\tim.h \
+  ..\Core\Inc\oled.h

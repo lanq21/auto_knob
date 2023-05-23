@@ -5,26 +5,17 @@
 #ifndef _OLED_H_
 #define _OLED_H_
 
-#define OLED_Direction 0
-// 设置 OLED 显示方向
-// 0, 1 : 竖屏
-// 2, 3 : 横屏
-
 #define OLED_Size 240
 
 #include "stm32f1xx_hal.h"
 #include "spi.h"
 #include "math.h"
-#include "stdlib.h"
 
 // GPIO
 // PC0: BLK
 // PC1: CS
 // PC2: DC
 // PC3: RES
-
-extern uint8_t *spi_buf; // SPI 发送缓冲区
-extern uint16_t *graph_buf; // OLED 显示缓冲区
 
 void OLED_Init(void);
 

@@ -1,8 +1,5 @@
 #include "oled.h"
 
-uint8_t *spi_buf; // SPI 发送缓冲区
-uint16_t *graph_buf; // OLED 显示缓冲区
-
 void Exange(uint16_t *a, uint16_t *b)
 {
     uint16_t temp = *a;
@@ -13,11 +10,6 @@ void Exange(uint16_t *a, uint16_t *b)
 // OLED 初始化
 void OLED_Init(void)
 {
-    spi_buf = (uint8_t *)malloc(sizeof(uint8_t) * OLED_Size * OLED_Size * 2 + 100);
-    graph_buf = (uint16_t *)malloc(sizeof(uint16_t) * OLED_Size * OLED_Size);
-    for (int i = 0; i < OLED_Size * OLED_Size; i++)
-        graph_buf[i] = BLACK;
-
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_RESET); // 复位
     HAL_Delay(100);
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_3, GPIO_PIN_SET);
@@ -77,14 +69,7 @@ void OLED_Init(void)
     OLED_Write_Data_8(0x20);
 
     OLED_Write_Cmd(0x36);
-    if (OLED_Direction == 0)
-        OLED_Write_Data_8(0x08);
-    else if (OLED_Direction == 1)
-        OLED_Write_Data_8(0xC8);
-    else if (OLED_Direction == 2)
-        OLED_Write_Data_8(0x68);
-    else
-        OLED_Write_Data_8(0xA8);
+    OLED_Write_Data_8(0x08);
 
     OLED_Write_Cmd(0x3A);
     OLED_Write_Data_8(0x05);
@@ -268,10 +253,9 @@ void OLED_Init(void)
 // SPI 发送命令
 void OLED_Write_Cmd(uint8_t cmd)
 {
-    spi_buf[0] = cmd;
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(&hspi1, spi_buf, 1, HAL_MAX_DELAY);
+    HAL_SPI_Transmit(&hspi1, &cmd, 1, HAL_MAX_DELAY);
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_SET);
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_SET);
 }
@@ -279,28 +263,23 @@ void OLED_Write_Cmd(uint8_t cmd)
 // SPI 发送数据
 void OLED_Write_Data_8(uint8_t data)
 {
-    spi_buf[0] = data;
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(&hspi1, spi_buf, 1, HAL_MAX_DELAY);
+    HAL_SPI_Transmit(&hspi1, &data, 1, HAL_MAX_DELAY);
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_SET);
 }
 
 void OLED_Write_Data_16(uint16_t data)
 {
-    spi_buf[0] = data >> 8;
-    spi_buf[1] = data;
+    uint8_t data_buf[2];
+    data_buf[0] = data >> 8;
+    data_buf[1] = data;
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(&hspi1, spi_buf, 2, HAL_MAX_DELAY);
+    HAL_SPI_Transmit(&hspi1, data_buf, 2, HAL_MAX_DELAY);
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_SET);
 }
 
 void OLED_Draw(uint16_t x_begin, uint16_t y_begin, uint16_t x_end, uint16_t y_end)
 {
-    if (x_begin > x_end) Exange(&x_begin, &x_end);
-    if (y_begin > y_end) Exange(&y_begin, &y_end);
-    x_end = x_end >= OLED_Size ? OLED_Size-1 : x_end;
-    y_end = y_end >= OLED_Size ? OLED_Size-1 : y_end;
-
     OLED_Write_Cmd(0x2a); // 设置列地址
     OLED_Write_Data_16(x_begin);
     OLED_Write_Data_16(x_end);
@@ -308,40 +287,36 @@ void OLED_Draw(uint16_t x_begin, uint16_t y_begin, uint16_t x_end, uint16_t y_en
     OLED_Write_Data_16(y_begin);
     OLED_Write_Data_16(y_end);
     OLED_Write_Cmd(0x2c); // 储存器写
-
-    uint16_t count = 0;
-    for (uint16_t i = y_begin; i <= y_end; i++)
-        for (uint16_t j = x_begin; j <= x_end; j++)
-        {
-            uint16_t color = graph_buf[i * OLED_Size + j];
-            spi_buf[count++] = color >> 8;
-            spi_buf[count++] = color;
-        }
-    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(&hspi1, spi_buf, count, HAL_MAX_DELAY);
-    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, GPIO_PIN_SET);
 }
 
 // 清屏, 全部填充为黑色
 void OLED_Clear()
 {
-    OLED_Fill(0, 0, OLED_Size-1, OLED_Size-1, BLACK);
+    OLED_Fill(0, 0, OLED_Size - 1, OLED_Size - 1, BLACK);
 }
 
 // 填充矩形区域
 void OLED_Fill(uint16_t x_begin, uint16_t y_begin, uint16_t x_end, uint16_t y_end, uint16_t color)
 {
+    if (x_begin > x_end)
+        Exange(&x_begin, &x_end);
+    if (y_begin > y_end)
+        Exange(&y_begin, &y_end);
+    x_end = x_end >= OLED_Size ? OLED_Size - 1 : x_end;
+    y_end = y_end >= OLED_Size ? OLED_Size - 1 : y_end;
+
+    OLED_Draw(x_begin, y_begin, x_end, y_end);
+
     for (uint16_t i = y_begin; i <= y_end; i++)
         for (uint16_t j = x_begin; j <= x_end; j++)
-            graph_buf[i * (x_end - x_begin + 1) + j] = color;
-    OLED_Draw(x_begin, y_begin, x_end, y_end);
+            OLED_Write_Data_16(color);
 }
 
 // 画一个点
 void OLED_Draw_Point(uint16_t x, uint16_t y, uint16_t color)
 {
-    graph_buf[y * OLED_Size + x] = color;
     OLED_Draw(x, y, x, y);
+    OLED_Write_Data_16(color);
 }
 
 void OLED_Draw_Line(uint16_t x_begin, uint16_t y_begin, uint16_t x_end, uint16_t y_end, float width, uint16_t color)
@@ -398,25 +373,17 @@ void OLED_Draw_Line(uint16_t x_begin, uint16_t y_begin, uint16_t x_end, uint16_t
             y_max = y_end + sqrt((width) * (width) / 4.0 - (x - x_end) * (x - x_end));
         else
             y_max = y_begin + (x - x_begin) * tan_theta + 0.5 * width / cos_theta;
-        uint16_t average = (y_min + y_max) / 2.0 + 0.5;
+
         y_min = (y_min > 0) ? ceil(y_min) : 0;
         y_max = (y_max < OLED_Size - 1) ? floor(y_max) : (OLED_Size - 1);
-        if (y_min <= y_max)
-        {
-            for (uint16_t y = y_min; y <= y_max; y++)
-            {
-                if (base_axis == 0)
-                    OLED_Draw_Point(x, y, color);
-                else
-                    OLED_Draw_Point(y, x, color);
-            }
-        }
-        else
+        if (y_min > y_max)
+            y_min = y_max = (uint16_t)(y_min + y_max) / 2.0 + 0.5;
+        for (uint16_t y = y_min; y <= y_max; y++)
         {
             if (base_axis == 0)
-                OLED_Draw_Point(x, average, color);
+                OLED_Draw_Point(x, y, color);
             else
-                OLED_Draw_Point(average, x, color);
+                OLED_Draw_Point(y, x, color);
         }
     }
 }

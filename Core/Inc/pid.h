@@ -1,7 +1,7 @@
 #ifndef _PID_H_
 #define _PID_H_
 
-#include "math.h"
+#include "stdint.h"
 
 typedef struct PID
 {
@@ -12,6 +12,7 @@ typedef struct PID
     float error;
     float error_last;
     float error_sum;
+    uint8_t flag_angle;
 } PID;
 
 float Restrict(float value,float min,float max);

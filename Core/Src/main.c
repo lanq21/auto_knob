@@ -60,6 +60,7 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN 0 */
 
 uint32_t lastTime, deltaTime;
+char str[100];
 
 /* USER CODE END 0 */
 
@@ -101,7 +102,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   Knob_Init();
-  Knob_Multi_Switch_Init(180);
+  Knob_Multi_Switch_Init(5);
 
   /* USER CODE END 2 */
 
@@ -114,6 +115,11 @@ int main(void)
     /* USER CODE BEGIN 3 */
     
     Knob_Run();
+		u1_printf("%f\n", Motor_Current_Speed);
+		
+    
+    // if(u1_scanf("%s", str))
+		// 	u1_printf("%s\n", str);
 
 		// uint32_t z = HAL_GetTick();
 		// deltaTime = z - lastTime;

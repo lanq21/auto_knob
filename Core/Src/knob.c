@@ -69,11 +69,11 @@ void Knob_Multi_Switch_Init(uint16_t count)
 
 void Knob_Run()
 {
-		uint16_t angle = (uint16_t) Motor_Current_Angle;
+	uint16_t angle = (uint16_t) Motor_Current_Angle;
     if (Knob_Mode == Multi_Switch)
     {
         OLED_Draw_Line(120, 120, 120 + 80 * Cos[last_angle], 120 - 80 * Sin[last_angle], 5, BLACK);
-				OLED_Draw_Line(120, 120, 120 + 80 * Cos[angle], 120 - 80 * Sin[angle], 5, WHITE);
+		OLED_Draw_Line(120, 120, 120 + 80 * Cos[angle], 120 - 80 * Sin[angle], 5, WHITE);
     }
     last_angle = angle;
 }

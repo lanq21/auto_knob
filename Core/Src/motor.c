@@ -65,7 +65,8 @@ void Motor_Set_Voltage(float U_q, float U_d, float electric_angle)
 
 void Motor_Init()
 {
-    PID_Init(&Motor_Angle, 1.5f, 0.0f, 0.0f);
+		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 1);
+    PID_Init(&Motor_Angle, 1.0f, 0.0f, 0.0f);
     Motor_Angle.flag_angle = 1;
     PID_Init(&Motor_Speed, 0.1f, 0.0f, 0.0f);
     Motor_TransmitReceive();

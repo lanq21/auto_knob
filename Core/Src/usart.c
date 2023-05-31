@@ -1,29 +1,29 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file    usart.c
-  * @brief   This file provides code for the configuration
-  *          of the USART instances.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2023 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file    usart.c
+ * @brief   This file provides code for the configuration
+ *          of the USART instances.
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2023 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
-#include<stdarg.h>
-#include<string.h>
-#include<stdio.h>
+#include <stdarg.h>
+#include <string.h>
+#include <stdio.h>
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart1;
@@ -53,7 +53,7 @@ void MX_USART1_UART_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN USART1_Init 2 */
-
+  // HAL_UART_Receive_IT(&huart1, (uint8_t *)UART1_temp, 1);
   /* USER CODE END USART1_Init 2 */
 
 }
@@ -115,15 +115,16 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 }
 
 /* USER CODE BEGIN 1 */
-void u1_printf(char* fmt,...)
+void u1_printf(char *fmt, ...)
 {
-	uint16_t len;
-	va_list ap;
+  uint16_t len;
+  va_list ap;
   va_start(ap, fmt);
   uint8_t buf[400];
-  vsprintf((char*)buf, fmt, ap);
+  vsprintf((char *)buf, fmt, ap);
   va_end(ap);
-  len = strlen((char*)buf);
+  len = strlen((char *)buf);
   HAL_UART_Transmit(&huart1, buf, len, HAL_MAX_DELAY);
 }
+
 /* USER CODE END 1 */

@@ -7,7 +7,6 @@
 #include "pid.h"
 #include "tim.h"
 
-#define PI 3.14159265358979323846f
 #define Motor_Pole_Pairs 11
 #define Motor_Direction 1
 #define Motor_Voltage_Limit 10
@@ -21,6 +20,8 @@ typedef enum Motor_Mode_Type
 		Motor_Mode_Torque
 } Motor_Mode_Type;
 
+extern Motor_Mode_Type Motor_Mode;
+
 extern PID Motor_Angle;
 extern PID Motor_Speed;
 extern float Motor_Torque_Goal;
@@ -30,6 +31,7 @@ extern float Motor_PWM_Duty_b;
 extern float Motor_PWM_Duty_c;
 
 extern float Motor_Current_Angle;
+extern float Motor_Global_Angle;
 extern float Motor_Current_Speed;
 
 extern float Motor_Zero_Electric_Angle;

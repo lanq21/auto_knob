@@ -13,6 +13,7 @@
 "auto_knob\usart.o"
 "auto_knob\stm32f1xx_it.o"
 "auto_knob\stm32f1xx_hal_msp.o"
+"auto_knob\font.o"
 "auto_knob\stm32f1xx_hal_gpio_ex.o"
 "auto_knob\stm32f1xx_hal_adc.o"
 "auto_knob\stm32f1xx_hal_adc_ex.o"

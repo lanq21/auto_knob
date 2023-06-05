@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "pid.h": "c",
+        "spi.h": "c",
+        "usart.h": "c"
+    }
+}

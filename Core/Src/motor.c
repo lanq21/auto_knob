@@ -13,27 +13,34 @@ float Motor_PWM_Duty_c;
 const uint16_t cmdAngle = 0xffff;
 uint16_t rxData;
 float Motor_Current_Angle;
+float Motor_Global_Angle;
 float Motor_Current_Speed;
 
 float Motor_Zero_Electric_Angle = 0;
 
 float Motor_Electric_Angle()
 {
-    return Normalize(Motor_Current_Angle * Motor_Pole_Pairs  * Motor_Direction - Motor_Zero_Electric_Angle, 0.0f, 360.0f);
+    return Normalize(Motor_Current_Angle * Motor_Pole_Pairs * Motor_Direction - Motor_Zero_Electric_Angle, 0.0f, 360.0f);
 }
 
+int32_t roll = 0;
 void Motor_TransmitReceive()
 {
-	HAL_GPIO_WritePin(SPI3CS_GPIO_Port, SPI3CS_Pin, 0);
+    HAL_GPIO_WritePin(SPI3CS_GPIO_Port, SPI3CS_Pin, 0);
     HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)&cmdAngle, (uint8_t *)&rxData, 1, HAL_MAX_DELAY);
     HAL_GPIO_WritePin(SPI3CS_GPIO_Port, SPI3CS_Pin, 1);
-	
-	HAL_GPIO_WritePin(SPI3CS_GPIO_Port, SPI3CS_Pin, 0);
+
+    HAL_GPIO_WritePin(SPI3CS_GPIO_Port, SPI3CS_Pin, 0);
     HAL_SPI_TransmitReceive(&hspi2, (uint8_t *)&cmdAngle, (uint8_t *)&rxData, 1, HAL_MAX_DELAY);
     HAL_GPIO_WritePin(SPI3CS_GPIO_Port, SPI3CS_Pin, 1);
-	
+
     float angle = (float)(rxData & 0x3fff) * 360.0f / 16384.0f;
-    Motor_Current_Speed = Normalize(angle - Motor_Current_Angle, -180.0f, 180.0f);
+    Motor_Current_Speed = Normalize(angle - Motor_Current_Angle, -180.0f, 180.0f) * 100;
+    if (angle - Motor_Current_Angle < -180.0f)
+        ++roll;
+    if (angle - Motor_Current_Angle > 180.0f)
+        --roll;
+    Motor_Global_Angle = angle + roll * 360.0f;
     Motor_Current_Angle = angle;
 }
 
@@ -65,9 +72,8 @@ void Motor_Set_Voltage(float U_q, float U_d, float electric_angle)
 
 void Motor_Init()
 {
-		HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 1);
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, 1);
     PID_Init(&Motor_Angle, 1.0f, 0.0f, 0.0f);
-    Motor_Angle.flag_angle = 1;
     PID_Init(&Motor_Speed, 0.1f, 0.0f, 0.0f);
     Motor_TransmitReceive();
     Motor_Current_Speed = 0;
@@ -103,9 +109,9 @@ void Motor_Run()
     if (Motor_Mode == Motor_Mode_Speed)
         U_q += PID_Calculate(&Motor_Speed, Motor_Current_Speed);
     else if (Motor_Mode == Motor_Mode_Angle)
-        U_q = PID_Calculate(&Motor_Angle, Motor_Current_Angle);
-    else if(Motor_Mode == Motor_Mode_Torque)
-        U_q = Restrict(Motor_Torque_Goal, -1.0f, 1.0f)* Motor_Voltage_Limit / 2.0f;
+        U_q = PID_Calculate(&Motor_Angle, Motor_Global_Angle);
+    else if (Motor_Mode == Motor_Mode_Torque)
+        U_q = Restrict(Motor_Torque_Goal, -1.0f, 1.0f) * Motor_Voltage_Limit / 2.0f;
     else if (Motor_Mode == Motor_Mode_Stop)
         U_q = 0;
     U_q = Restrict(U_q, -Motor_Voltage_Limit / 2.0f, Motor_Voltage_Limit / 2.0f);

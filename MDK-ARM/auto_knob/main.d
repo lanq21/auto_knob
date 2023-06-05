@@ -35,4 +35,4 @@ auto_knob/main.o: ..\Core\Src\main.c ..\Core\Inc\main.h \
   ..\Core\Inc\tim.h ..\Core\Inc\usart.h ..\Core\Inc\gpio.h \
   ..\Core\Inc\knob.h ..\Core\Inc\motor.h \
   C:\Keil_v5\ARM\ARMCLANG\Bin\..\include\math.h ..\Core\Inc\pid.h \
-  ..\Core\Inc\oled.h
+  ..\Core\Inc\oled.h ..\Core\Inc\font.h

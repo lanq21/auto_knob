@@ -396,6 +396,210 @@ void OLED_Draw_Rectangle(uint16_t x_begin, uint16_t y_begin, uint16_t x_end, uin
     OLED_Draw_Line(x_begin, y_end, x_end, y_end, 1, color);
 }
 
-void OLED_Draw_Circle(uint16_t x, uint16_t y, uint16_t r, uint16_t color)
+void OLED_Draw_Circle(uint16_t x, uint16_t y, float r, uint16_t color)
 {
+    int16_t x_begin = x - r + 0.5;
+    int16_t x_end = x + r + 0.5;
+    int16_t y_begin = y - r + 0.5;
+    int16_t y_end = y + r + 0.5;
+
+    x_begin = (x_begin > 0) ? x_begin : 0;
+    x_end = (x_end < OLED_Size - 1) ? x_end : (OLED_Size - 1);
+    y_begin = (y_begin > 0) ? y_begin : 0;
+    y_end = (y_end < OLED_Size - 1) ? y_end : (OLED_Size - 1);
+
+    uint32_t r_square = r * r + 0.5;
+    for (uint16_t i = y_begin; i <= y_end; i++)
+        for (uint16_t j = x_begin; j <= x_end; j++)
+            if ((i - y) * (i - y) + (j - x) * (j - x) <= r_square)
+                OLED_Draw_Point(j, i, color);
+}
+
+void OLED_Draw_Circle_Covered(uint16_t x, uint16_t y, float r, uint16_t color)
+{
+    int16_t x_begin = x - r + 0.5;
+    int16_t x_end = x + r + 0.5;
+    int16_t y_begin = y - r + 0.5;
+    int16_t y_end = y + r + 0.5;
+
+    x_begin = (x_begin > 0) ? x_begin : 0;
+    x_end = (x_end < OLED_Size - 1) ? x_end : (OLED_Size - 1);
+    y_begin = (y_begin > 0) ? y_begin : 0;
+    y_end = (y_end < OLED_Size - 1) ? y_end : (OLED_Size - 1);
+    uint32_t r_square = r * r + 0.5;
+
+    OLED_Draw(x_begin, y_begin, x_end, y_end);
+
+    for (uint16_t i = y_begin; i <= y_end; i++)
+        for (uint16_t j = x_begin; j <= x_end; j++)
+            if ((i - y) * (i - y) + (j - x) * (j - x) <= r_square)
+                OLED_Write_Data_16(color);
+            else
+                OLED_Write_Data_16(BLACK);
+}
+
+void OLED_Draw_Radiu(uint16_t x, uint16_t y, float r, float width, int16_t angle_begin, int16_t angle_end, uint16_t color)
+{
+    float half_width = width / 2.0;
+    if (angle_begin < 0)
+        angle_begin += 360;
+    while (angle_end < angle_begin)
+        angle_end += 360;
+
+    int16_t x_r_cos_begin = x + r * cosf(angle_begin / 180.0f * PI) + 0.5;
+    int16_t y_r_sin_begin = y - r * sinf(angle_begin / 180.0f * PI) + 0.5;
+    int16_t x_r_cos_end = x + r * cosf(angle_end / 180.0f * PI) + 0.5;
+    int16_t y_r_sin_end = y - r * sinf(angle_end / 180.0f * PI) + 0.5;
+
+    int16_t x_begin, x_end, y_begin, y_end;
+    if (angle_begin <= 180 && angle_end >= 180 || angle_end >= 180 + 360)
+        x_begin = x - r;
+    else
+        x_begin = (x_r_cos_begin < x_r_cos_end) ? x_r_cos_begin : x_r_cos_end;
+
+    if (angle_end >= 360)
+        x_end = x + r;
+    else
+        x_end = (x_r_cos_begin > x_r_cos_end) ? x_r_cos_begin : x_r_cos_end;
+
+    if (angle_begin < 270 && angle_end > 270 || angle_end > 270 + 360)
+        y_begin = y - r;
+    else
+        y_begin = (y_r_sin_begin < y_r_sin_end) ? y_r_sin_begin : y_r_sin_end;
+
+    if (angle_begin < 90 && angle_end > 90 || angle_end > 90 + 360)
+        y_end = y + r;
+    else
+        y_end = (y_r_sin_begin > y_r_sin_end) ? y_r_sin_begin : y_r_sin_end;
+
+    x_begin = x_begin - half_width + 0.5;
+    x_end = x_end + half_width + 0.5;
+    y_begin = y_begin - half_width + 0.5;
+    y_end = y_end + half_width + 0.5;
+
+    x_begin = (x_begin > 0) ? x_begin : 0;
+    x_end = (x_end < OLED_Size - 1) ? x_end : (OLED_Size - 1);
+    y_begin = (y_begin > 0) ? y_begin : 0;
+    y_end = (y_end < OLED_Size - 1) ? y_end : (OLED_Size - 1);
+
+    uint32_t r_square_in = (r - half_width) * (r - half_width) + 0.5;
+    uint32_t r_square_out = (r + half_width) * (r + half_width) + 0.5;
+
+    uint32_t distance_square;
+    for (uint16_t i = y_begin; i <= y_end; i++)
+        for (uint16_t j = x_begin; j <= x_end; j++)
+        {
+            distance_square = (i - y) * (i - y) + (j - x) * (j - x);
+            if (distance_square <= r_square_out && distance_square >= r_square_in)
+            {
+                int16_t angle = atan2f(y - i, j - x) / PI * 180.0f + 0.5;
+                while (angle < angle_begin)
+                    angle += 360;
+                if (angle <= angle_end)
+                    OLED_Draw_Point(j, i, color);
+            }
+        }
+}
+
+void OLED_Draw_Char(uint16_t x, uint16_t y, uint8_t ch, uint16_t color, uint16_t back_color, uint8_t sizey, uint8_t cover)
+{
+    // ch = ch - ' ';
+    // uint8_t sizex = sizey / 2;
+
+    // OLED_Draw(x, y, x + sizex - 1, y + sizey - 1); // 设置光标位置
+    // for (uint16_t i = 0; i < sizey; i++)
+    // {
+    //     uint8_t ch_line;
+    //     if (sizey == 12)
+    //         ch_line = ascii_1206[ch][i]; // 调用6x12字体
+    //     else if (sizey == 16)
+    //         ch_line = ascii_1608[ch][i]; // 调用8x16字体
+    //     else if (sizey == 24)
+    //         ch_line = ascii_2412[ch][i]; // 调用12x24字体
+    //     else if (sizey == 32)
+    //         ch_line = ascii_3216[ch][i]; // 调用16x32字体
+    //     else
+    //         return;
+    //     uint8_t line_count = 0;
+    //     for (uint8_t ch_point = 0; ch_point < 8; ch_point++)
+    //     {
+    //         if (ch_line & (0x01 << ch_point))
+    //             OLED_Write_Data_16(color);
+    //         else
+    //             OLED_Write_Data_16(color);
+    //         if (line_count++ == sizex)
+    //             break;
+    //     }
+    // }
+
+    uint8_t temp, sizex, t, m = 0;
+    uint16_t i, TypefaceNum; // 一个字符所占字节大小
+    uint16_t x0 = x;
+    sizex = sizey / 2;
+    TypefaceNum = (sizex / 8 + ((sizex % 8) ? 1 : 0)) * sizey;
+    ch = ch - ' ';                                 // 得到偏移后的值
+    OLED_Draw(x, y, x + sizex - 1, y + sizey - 1); // 设置光标位置
+    for (i = 0; i < TypefaceNum; i++)
+    {
+        if (sizey == 12)
+            temp = ascii_1206[ch][i]; // 调用6x12字体
+        else if (sizey == 16)
+            temp = ascii_1608[ch][i]; // 调用8x16字体
+        else if (sizey == 24)
+            temp = ascii_2412[ch][i]; // 调用12x24字体
+        else if (sizey == 32)
+            temp = ascii_3216[ch][i]; // 调用16x32字体
+        else
+            return;
+        for (t = 0; t < 8; t++)
+        {
+            if (cover) // 非叠加模式
+            {
+                if (temp & (0x01 << t))
+                    OLED_Write_Data_16(color);
+                else
+                    OLED_Write_Data_16(back_color);
+                m++;
+                if (m % sizex == 0)
+                {
+                    m = 0;
+                    break;
+                }
+            }
+            else // 叠加模式
+            {
+                if (temp & (0x01 << t))
+                    OLED_Draw_Point(x, y, color); // 画一个点
+                x++;
+                if ((x - x0) == sizex)
+                {
+                    x = x0;
+                    y++;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+void OLED_Draw_Int(uint16_t x, uint16_t y, int num, uint16_t color, uint16_t back_color, uint8_t sizey, uint8_t cover)
+{
+    uint8_t sizex = sizey / 2;
+    uint8_t num_buf[10];
+    uint8_t num_len = 0;
+    if (num == 0)
+    {
+        num_buf[0] = '0';
+        num_len = 1;
+    }
+    else
+    {
+        while (num)
+        {
+            num_buf[num_len++] = num % 10 + '0';
+            num /= 10;
+        }
+    }
+    for (uint8_t i = 0; i < num_len; i++)
+        OLED_Draw_Char(x + sizex * i, y, num_buf[num_len - i - 1], color, back_color, sizey, cover);
 }

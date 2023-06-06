@@ -20,7 +20,7 @@ mode = knob_mode.Mode_Type(knob_mode.Mode_Type.select)
 
 vol_ctrl.volume_init()
 
-if (knob_serial.serial_open("COM26", 115200)):
+if (knob_serial.serial_open("COM23", 115200)):
 
     while (True):
 

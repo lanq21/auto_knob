@@ -32,11 +32,11 @@ void PID_Clear(PID *pid)
 
 void PID_Set_Goal(PID *pid, float goal)
 {
-		if(pid->goal != goal)
-		{
-				pid->error_sum = 0;
-				pid->goal = goal;
-		}
+    if (pid->goal != goal)
+    {
+        pid->error_sum = 0;
+        pid->goal = goal;
+    }
 }
 
 float PID_Calculate(PID *pid, float data)

@@ -110,7 +110,7 @@ int main(void)
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
-        u1_printf("%f,%f\n",Motor_Current_Angle, Motor_Current_Speed);
+        u1_printf("%f,%f\n", Motor_Current_Angle, Motor_Current_Speed);
         Knob_Draw();
     }
     /* USER CODE END 3 */
@@ -173,10 +173,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
-		if (huart->Instance == USART1)
-		{
-				Knob_UART();
-		}
+    if (huart->Instance == USART1)
+    {
+        Knob_UART();
+    }
 }
 /* USER CODE END 4 */
 

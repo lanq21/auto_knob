@@ -8,7 +8,6 @@ uint8_t Draw_Mode;
 float Cos[360];
 float Sin[360];
 
-float closest_angle[361];
 uint16_t last_angle;
 uint8_t clear_task;
 
@@ -19,9 +18,6 @@ void Knob_Init()
         Cos[i] = cos(i / 180.0 * 3.14159);
         Sin[i] = sin(i / 180.0 * 3.14159);
     }
-
-    for (uint16_t i = 0; i < 360; ++i)
-        closest_angle[i] = 0.0f;
 
     last_angle = 0;
 

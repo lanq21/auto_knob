@@ -2,7 +2,6 @@ import input_sim
 import vol_ctrl
 import knob_serial
 import knob_mode
-from time import sleep
 
 first_call = True
 last_angle = 0

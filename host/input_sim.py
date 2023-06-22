@@ -41,7 +41,7 @@ def wheel_run(angle, speed):
     print("模拟滚轮\n\n")
     print("当前角度:")
     print(angle)
-    print("\n无操作 5 秒后自动返回功能选择")
+    # print("\n无操作 5 秒后自动返回功能选择")
     if (speed > 15):
         wheel_down(int(speed // 5))
     elif (speed < -15):
@@ -52,7 +52,7 @@ def key_lr_run(angle):
     print("模拟方向键 ← →\n\n")
     print("当前角度:")
     print(angle)
-    print("\n无操作 5 秒后自动返回功能选择")
+    # print("\n无操作 5 秒后自动返回功能选择")
     err = int(angle - 180)
     if (err > 20):
         for i in range(err // 10):
@@ -66,7 +66,7 @@ def key_ud_run(angle):
     print("模拟方向键 ↑ ↓\n\n")
     print("当前角度:")
     print(angle)
-    print("\n无操作 5 秒后自动返回功能选择")
+    # print("\n无操作 5 秒后自动返回功能选择")
     err = int(angle - 180)
     if (err > 20):
         for i in range(err // 10):
